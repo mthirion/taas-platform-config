@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: team-projects
+  namespace: taas
+spec:
+  generators:
+    - git:
+        repoURL: {{ .Values.platformRepo }}
+        revision: main
+        files:
+          - path: "teams/*.yaml"
+  template:
+    metadata:
+      name: "project-{{ "{{" }} team {{ "}}" }}"
+    spec:
+      project: default
+      sources:
+        - repoURL: {{ .Values.platformRepo }}
+          targetRevision: main
+          path: "team-project"
+          helm:
+            parameters:
+              - name: team
+                value: "{{ "{{" }} team {{ "}}" }}"
+              - name: repo
+                value: "{{ "{{" }} repo {{ "}}" }}"
+              - name: admins
+                value: "{{ "{{" }} admins {{ "}}" }}"
+              - name: chartsRepo
+                value: {{ .Values.chartsRepo }}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: taas
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

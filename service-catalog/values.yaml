@@ -1,0 +1,46 @@
+platformRepo: https://github.com/mthirion/taas-platform-config
+chartsRepo: https://github.com/mthirion/taas-charts
+teamRepoPattern: https://github.com/mthirion/taas-*
+
+services:
+  - name: databases
+    description: Database-as-a-Service
+    prefix: db
+    createNamespace: false
+    chartPath: "database-{{ technology }}"
+    scanPath: "databases/*/*.yaml"
+    namespace: "taas-{{ team }}-{{ path[1] }}"
+    helmParameters:
+      - name: team
+        value: "{{ team }}"
+      - name: namespace
+        value: "{{ path[1] }}"
+    valueFiles: "$values/databases/{{ path[1] }}/{{ path.filename }}"
+
+  - name: namespaces
+    description: Namespace-as-a-Service
+    prefix: ns
+    createNamespace: true
+    chartPath: "namespace"
+    scanPath: "namespaces/*.yaml"
+    namespace: "taas-{{ team }}-{{ name }}"
+    helmParameters:
+      - name: team
+        value: "{{ team }}"
+      - name: admins
+        value: "{{ admins }}"
+    valueFiles: "$values/namespaces/{{ path.filename }}"
+
+  - name: operations
+    description: Day-2 operations
+    prefix: ops
+    createNamespace: false
+    chartPath: "database-{{ technology }}-ops"
+    scanPath: "operations/*/*.yaml"
+    namespace: "taas-{{ team }}-{{ path[1] }}"
+    helmParameters:
+      - name: team
+        value: "{{ team }}"
+      - name: namespace
+        value: "{{ path[1] }}"
+    valueFiles: "$values/operations/{{ path[1] }}/{{ path.filename }}"

@@ -1,0 +1,4 @@
+apiVersion: v2
+name: team-project
+description: Generates an ArgoCD AppProject for a team
+version: 1.0.0

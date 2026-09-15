@@ -1,0 +1,57 @@
+{{- range .Values.services }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: {{ .name }}-service
+  namespace: taas
+spec:
+  generators:
+    - matrix:
+        generators:
+          - git:
+              repoURL: {{ $.Values.platformRepo }}
+              revision: main
+              pathParamPrefix: reg
+              files:
+                - path: "teams/*.yaml"
+          - git:
+              repoURL: "{{ "{{" }} repo {{ "}}" }}"
+              revision: main
+              files:
+                - path: {{ .scanPath | quote }}
+  template:
+    metadata:
+      name: "{{ .prefix }}-{{ "{{" }} team {{ "}}" }}-{{ "{{" }} name {{ "}}" }}"
+    spec:
+      project: "{{ "{{" }} team {{ "}}" }}"
+      sources:
+        - repoURL: {{ $.Values.chartsRepo }}
+          targetRevision: "{{ "{{" }} chartRevision {{ "}}" }}"
+          path: {{ .chartPath | quote }}
+          helm:
+            parameters:
+              {{- range .helmParameters }}
+              - name: {{ .name }}
+                value: {{ .value | quote }}
+              {{- end }}
+            valueFiles:
+              - {{ .valueFiles | quote }}
+        - repoURL: "{{ "{{" }} repo {{ "}}" }}"
+          targetRevision: main
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: {{ .namespace | quote }}
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+{{- if .createNamespace }}
+        managedNamespaceMetadata:
+          labels:
+            argocd.argoproj.io/managed-by: taas
+        syncOptions:
+          - CreateNamespace=true
+{{- end }}
+{{- end }}

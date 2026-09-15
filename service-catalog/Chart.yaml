@@ -1,0 +1,4 @@
+apiVersion: v2
+name: service-catalog
+description: Dynamic service catalog - generates per-team AppProjects and per-service ApplicationSets
+version: 1.0.0

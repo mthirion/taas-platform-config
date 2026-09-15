@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: service-catalog
+  namespace: taas
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mthirion/taas-platform-config
+    targetRevision: main
+    path: service-catalog
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: taas
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
